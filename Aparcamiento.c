@@ -10,6 +10,11 @@ int esDigitoValido(char caracter);
 int esLetraValida(char caracter);
 int esMatriculaValida(char matricula[]);
 int existeUsuario(struct usuario usuarioValido, char username[], char password[]);
+void recuento(struct plaza aparcamiento[], int dim, int *nLibresCoches);
+void inicializar(struct plaza aparcamiento[], int dim);
+void inicializar2(struct plaza aparcamiento[], int dim);
+int buscarPlazaLibre(struct plaza aparcamiento[], int dim);
+int buscarVehiculo(struct plaza aparcamiento[], int dim, char matricula[]);
 
 struct plaza {
 	int estado;
@@ -26,11 +31,13 @@ struct usuario {
 void main() {
 
 	float precio;
-	int finBucle = 1, a = 0, i, p = 0, j, k = 0, posicion, l = 0, auxC = 0, auxM = 0;
-	struct plaza plazaC[PLAZASC] = { 0, 'C' }, plazaM[PLAZASM] = { 0, 'M' };
+	int finBucle = 1, a = 0, i, p = 0, j, k = 0, posicion, l = 0, auxC = 0, auxM = 0, libreC, libreM;
+	struct plaza plazaC[PLAZASC], plazaM[PLAZASM];
 	struct usuario persona1 = { "admin", "1234" };
 	char opcion, comprobarMatricula[8], eleccion, user[50], contraseña[50];
 	
+	inicializar(plazaC, PLAZASC);
+	inicializar2(plazaM, PLAZASM);
 
 	printf("Bienvenido, el precio del parking es de 2 centimos por segundo\n");
 	Sleep(2500);
@@ -79,9 +86,11 @@ void main() {
 		switch (opcion) {
 		case 'r':
 		case 'R':
-			printf("Has elegido la opcion reservar plaza\n");
+			printf("Has elegido la opcion reservar plaza");
+
 			Sleep(1300);
 			system("cls");
+			
 			printf("Que tipo de vehiculo tienes? coche (c) o moto (m):\n\n");
 			scanf_s("%c", &eleccion, 1);
 			getchar();
@@ -90,130 +99,128 @@ void main() {
 			switch (eleccion) {
 			case 'C':
 			case 'c':
-				for (i = 0; i < PLAZASC; i++) {
+				
+				if (buscarPlazaLibre(plazaC, PLAZASC) == -1) {
+					printf("Lo siento, no quedan plazas libres para coches\n");
+					break;
+				}
+				else {
+					
+					i = buscarPlazaLibre(plazaC, PLAZASC);
+					printf("Has reservado la plaza %d de coche\n\n", i + 1);
+					printf("Para registrarlo, introduce tu matricula: ");
+					scanf_s("%s", plazaC[i].matricula, 8);
+					getchar();
 
-					if (auxC == PLAZASC) {
-						printf("Lo siento, no quedan plazas libres para coches\n");
+					for (j = 4; j < 7; j++) {
+						if (97 <= plazaC[i].matricula[j] && plazaC[i].matricula[j] <= 122) {
+							plazaC[i].matricula[j] -= 32;
+						}
+					}
+
+					if (esMatriculaValida(plazaC[i].matricula)) {
+						for (j = 0; j < PLAZASC; j++) {
+							if (i != j) {
+								if (strcmp(plazaC[i].matricula, plazaC[j].matricula) == 0) {
+									system("cls");
+									printf("Esa matricula se encuentra registrada en la plaza %d de coche\n", j + 1);
+									k = 1;
+								}
+							}
+						}
+
+						for (j = 0; j < PLAZASM; j++) {
+							if (strcmp(plazaC[i].matricula, plazaM[j].matricula) == 0) {
+								system("cls");
+								printf("Esa matricula se encuentra registrada en la plaza %d de moto\n", j + 1);
+								k = 1;
+							}
+						}
+
+						if (k == 0) {
+							plazaC[i].estado = 1;
+							plazaC[i].tiempo1 = time(NULL);
+							auxC++;
+						}
+						else {
+							plazaC[i].matricula[0] = 0;
+						}
+
+						a = 0;
+						k = 0;
 						break;
 					}
 					else {
-						if (plazaC[i].estado == 0) {
-							printf("Has reservado la plaza %d de coche\n\n", i + 1);
-							printf("Para registrarlo, introduce tu matricula: ");
-							scanf_s("%s", plazaC[i].matricula, 8);
-							getchar();
-
-							for (j = 4; j < 7; j++) {
-								if (97 <= plazaC[i].matricula[j] && plazaC[i].matricula[j] <= 122) {
-									plazaC[i].matricula[j] -= 32;
-								}
-							}
-
-							if (esMatriculaValida(plazaC[i].matricula)) {
-								for (j = 0; j < PLAZASC; j++) {
-									if (i != j) {
-										if (strcmp(plazaC[i].matricula, plazaC[j].matricula) == 0) {
-											system("cls");
-											printf("Esa matricula se encuentra registrada en la plaza %d de coche\n", j + 1);
-											k = 1;
-										}
-									}
-								}
-
-								for (j = 0; j < PLAZASM; j++) {
-									if (strcmp(plazaC[i].matricula, plazaM[j].matricula) == 0) {
-										system("cls");
-										printf("Esa matricula se encuentra registrada en la plaza %d de moto\n", j + 1);
-										k = 1;
-									}
-								}
-
-								if (k == 0) {
-									plazaC[i].estado = 1;
-									plazaC[i].tiempo1 = time(NULL);
-									auxC++;
-								}
-								else {
-									plazaC[i].matricula[0] = 0;
-								}
-
-								a = 0;
-								k = 0;
-								break;
-							}
-							else {
-								printf("\n");
-								printf("Matricula incorrecta\n");
-								plazaC[i].matricula[0] = 0;
-								break;
-							}
-						}
+						printf("\n");
+						printf("Matricula incorrecta\n");
+						plazaC[i].matricula[0] = 0;
+						break;
 					}
 				}
+
 				break;
 
 			case'M':
 			case'm':
-				for (i = 0; i < PLAZASM; i++) {
+				
+				if (buscarPlazaLibre(plazaM, PLAZASM) == -1) {
+					printf("Lo siento, no quedan plazas libres para motos\n");
+					break;
+				}
+				else {
+					
+					i = buscarPlazaLibre(plazaM, PLAZASM);
+					printf("Has reservado la plaza %d de moto\n\n", i + 1);
+					printf("Para registrarlo, introduce tu matricula: ");
+					scanf_s("%s", plazaM[i].matricula, 8);
+					getchar();
 
-					if (auxM == PLAZASM) {
-						printf("Lo siento, no quedan plazas libres para motos\n");
+					for (j = 4; j < 7; j++) {
+						if (97 <= plazaM[i].matricula[j] && plazaM[i].matricula[j] <= 122) {
+							plazaM[i].matricula[j] -= 32;
+						}
+					}
+
+					if (esMatriculaValida(plazaM[i].matricula)) {
+						for (j = 0; j < PLAZASM; j++) {
+							if (i != j) {
+								if (strcmp(plazaM[i].matricula, plazaM[j].matricula) == 0) {
+									system("cls");
+									printf("Esa matricula se encuentra registrada en la plaza %d de moto\n", j + 1);
+									k = 1;
+								}
+							}
+						}
+
+						for (j = 0; j < PLAZASC; j++) {
+							if (strcmp(plazaM[i].matricula, plazaC[j].matricula) == 0) {
+								system("cls");
+								printf("Esa matricula se encuentra registrada en la plaza %d de coche\n", j + 1);
+								k = 1;
+							}
+						}
+
+						if (k == 0) {
+							plazaM[i].estado = 1;
+							plazaM[i].tiempo1 = time(NULL);
+							auxM++;
+						}
+						else {
+							plazaM[i].matricula[0] = 0;
+						}
+
+						a = 0;
+						k = 0;
 						break;
 					}
 					else {
-						if (plazaM[i].estado == 0) {
-							printf("Has reservado la plaza %d de moto\n\n", i + 1);
-							printf("Para registrarlo, introduce tu matricula: ");
-							scanf_s("%s", plazaM[i].matricula, 8);
-							getchar();
-
-							for (j = 4; j < 7; j++) {
-								if (97 <= plazaM[i].matricula[j] && plazaM[i].matricula[j] <= 122) {
-									plazaM[i].matricula[j] -= 32;
-								}
-							}
-
-							if (esMatriculaValida(plazaM[i].matricula)) {
-								for (j = 0; j < PLAZASM; j++) {
-									if (i != j) {
-										if (strcmp(plazaM[i].matricula, plazaM[j].matricula) == 0) {
-											system("cls");
-											printf("Esa matricula se encuentra registrada en la plaza %d de moto\n", j + 1);
-											k = 1;
-										}
-									}
-								}
-
-								for (j = 0; j < PLAZASC; j++) {
-									if (strcmp(plazaM[i].matricula, plazaC[j].matricula) == 0) {
-										system("cls");
-										printf("Esa matricula se encuentra registrada en la plaza %d de coche\n", j + 1);
-										k = 1;
-									}
-								}
-
-								if (k == 0) {
-									plazaM[i].estado = 1;
-									plazaM[i].tiempo1 = time(NULL);
-									auxM++;
-								}
-								else {
-									plazaM[i].matricula[0] = 0;
-								}
-
-								a = 0;
-								k = 0;
-								break;
-							}
-							else {
-								printf("\n");
-								printf("Matricula incorrecta\n");
-								plazaM[i].matricula[0] = 0;
-								break;
-							}
-						}
+						printf("\n");
+						printf("Matricula incorrecta\n");
+						plazaM[i].matricula[0] = 0;
+						break;
 					}
 				}
+
 				break;
 
 			default:
@@ -329,7 +336,7 @@ void main() {
 									auxM--;
 								}
 								else {
-									printf("La matricula no coincide con la moto aparcado en esta plaza\n");
+									printf("La matricula no coincide con la moto aparcada en esta plaza\n");
 								}
 							}
 							else {
@@ -355,6 +362,15 @@ void main() {
 			printf("Has elegido la opcion estado de aparcamiento\n");
 			Sleep(1300);
 			system("cls");
+
+			recuento(plazaC, PLAZASC, &libreC);
+			recuento(plazaM, PLAZASM, &libreM);
+
+			printf("Hay %d plazas libres de coche y %d plazas libres de moto\n\n", libreC, libreM);
+
+			system("pause");
+			system("cls");
+
 			printf("A continuacion se le mostrara un listado de las plazas del garaje:\n\n");
 			
 			for (i = 0; i < PLAZASC; i++) {
@@ -407,18 +423,13 @@ void main() {
 						}
 					}
 
-					for (i = 0; i < PLAZASC; i++) {
-						if (strcmp(plazaC[i].matricula, comprobarMatricula) == 0) {
-							printf("El coche se encuentra en la plaza %d\n", i + 1);
-							l = 1;
-						}
-					}
-
-					if (l == 0) {
+					if (buscarVehiculo(plazaC, PLAZASC, comprobarMatricula) == -1) {
 						printf("El coche no esta registrado en el garaje\n");
 					}
-
-					l = 0;
+					else {
+						i = buscarVehiculo(plazaC, PLAZASC, comprobarMatricula);
+						printf("El coche se encuentra en la plaza %d\n", i + 1);
+					}
 				}
 				break;
 
@@ -440,18 +451,13 @@ void main() {
 						}
 					}
 
-					for (i = 0; i < PLAZASM; i++) {
-						if (strcmp(plazaM[i].matricula, comprobarMatricula) == 0) {
-							printf("La moto se encuentra en la plaza %d\n", i + 1);
-							l = 1;
-						}
-					}
-
-					if (l == 0) {
+					if (buscarVehiculo(plazaM, PLAZASM, comprobarMatricula) == -1) {
 						printf("La moto no esta registrada en el garaje\n");
 					}
-
-					l = 0;
+					else {
+						i = buscarVehiculo(plazaM, PLAZASM, comprobarMatricula);
+						printf("La moto se encuentra en la plaza %d\n", i + 1);
+					}
 				}
 				break;
 
@@ -544,4 +550,63 @@ int existeUsuario(struct usuario usuarioValido, char username[], char password[]
 	}
 
 	return 0;
+}
+
+void recuento(struct plaza aparcamiento[], int dim, int *nLibres) {
+
+	int i;
+
+	*nLibres = 0;
+
+	for (i = 0; i < dim; i++) {
+		if (aparcamiento[i].estado == 0) {
+			*nLibres = *nLibres + 1;
+		}
+	}
+}
+
+void inicializar(struct plaza aparcamiento[], int dim) {
+
+	int i;
+
+	for (i = 0; i < dim; i++) {
+		aparcamiento[i].estado = 0;
+		aparcamiento[i].tipo = 'C';
+	}
+}
+
+void inicializar2(struct plaza aparcamiento[], int dim) {
+
+	int i;
+
+	for (i = 0; i < dim; i++) {
+		aparcamiento[i].estado = 0;
+		aparcamiento[i].tipo = 'M';
+	}
+}
+
+int buscarPlazaLibre(struct plaza aparcamiento[], int dim) {
+
+	int i;
+
+	for (i = 0; i < dim; i++) {
+		if (aparcamiento[i].estado == 0) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+int buscarVehiculo(struct plaza aparcamiento[], int dim, char matricula[]) {
+
+	int i;
+
+	for (i = 0; i < dim; i++) {
+		if (strcmp(aparcamiento[i].matricula, matricula) == 0) {
+			return i;
+		}
+	}
+
+	return -1;
 }
