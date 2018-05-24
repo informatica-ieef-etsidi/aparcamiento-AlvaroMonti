@@ -5,6 +5,12 @@
 #define PLAZASM 5
 #define PLAZASC 5
 
+char menu();
+int esDigitoValido(char caracter);
+int esLetraValida(char caracter);
+int esMatriculaValida(char matricula[]);
+int existeUsuario(struct usuario usuarioValido, char username[], char password[]);
+
 struct plaza {
 	int estado;
 	char tipo;
@@ -39,7 +45,7 @@ void main() {
 		gets(contraseña);
 		system("cls");
 
-		if (strcmp(user, persona1.nombre) == 0 && strcmp(contraseña, persona1.password) == 0) {
+		if (existeUsuario(persona1, user, contraseña)) {
 			system("cls");
 			printf("Accediendo al sistema");
 			p = 3;
@@ -68,15 +74,7 @@ void main() {
 		ctime_s(str, sizeof str, &result);
 		printf("%s\n", str);
 
-		printf("Que accion desea realizar?\n\n");
-		printf("Pulse 'R' para reservar plaza\n");
-		printf("Pulse 'A' para abandonar plaza\n");
-		printf("Pulse 'E' para ver el estado de aparcamiento\n");
-		printf("Pulse 'B' para buscar vehiculo por matricula\n");
-		printf("Pulse 'S' para finalizar sesion\n\n");
-		scanf_s("%c", &opcion, 1);
-		getchar();
-		system("cls");
+		opcion = menu();
 
 		switch (opcion) {
 		case 'r':
@@ -105,42 +103,13 @@ void main() {
 							scanf_s("%s", plazaC[i].matricula, 8);
 							getchar();
 
-							for (j = 0; j < 7; j++) {
+							for (j = 4; j < 7; j++) {
 								if (97 <= plazaC[i].matricula[j] && plazaC[i].matricula[j] <= 122) {
 									plazaC[i].matricula[j] -= 32;
 								}
 							}
 
-							for (j = 0; j < 7; j++) {
-								if (a == 0 && 48 <= plazaC[i].matricula[j] && plazaC[i].matricula[j] <= 57) {
-									a++;
-								}
-								else if (a == 1 && 48 <= plazaC[i].matricula[j] && plazaC[i].matricula[j] <= 57) {
-									a++;
-								}
-								else if (a == 2 && 48 <= plazaC[i].matricula[j] && plazaC[i].matricula[j] <= 57) {
-									a++;
-								}
-								else if (a == 3 && 48 <= plazaC[i].matricula[j] && plazaC[i].matricula[j] <= 57) {
-									a++;
-								}
-								else if (a == 4 && 65 <= plazaC[i].matricula[j] && plazaC[i].matricula[j] <= 90) {
-									a++;
-								}
-								else if (a == 5 && 65 <= plazaC[i].matricula[j] && plazaC[i].matricula[j] <= 90) {
-									a++;
-								}
-								else if (a == 6 && 65 <= plazaC[i].matricula[j] && plazaC[i].matricula[j] <= 90) {
-									a++;
-								}
-								else {
-									plazaC[i].matricula[0] = 0;
-									a = 0;
-									break;
-								}
-							}
-
-							if (a == 7) {
+							if (esMatriculaValida(plazaC[i].matricula)) {
 								for (j = 0; j < PLAZASC; j++) {
 									if (i != j) {
 										if (strcmp(plazaC[i].matricula, plazaC[j].matricula) == 0) {
@@ -164,6 +133,9 @@ void main() {
 									plazaC[i].tiempo1 = time(NULL);
 									auxC++;
 								}
+								else {
+									plazaC[i].matricula[0] = 0;
+								}
 
 								a = 0;
 								k = 0;
@@ -172,6 +144,7 @@ void main() {
 							else {
 								printf("\n");
 								printf("Matricula incorrecta\n");
+								plazaC[i].matricula[0] = 0;
 								break;
 							}
 						}
@@ -194,42 +167,13 @@ void main() {
 							scanf_s("%s", plazaM[i].matricula, 8);
 							getchar();
 
-							for (j = 0; j < 7; j++) {
+							for (j = 4; j < 7; j++) {
 								if (97 <= plazaM[i].matricula[j] && plazaM[i].matricula[j] <= 122) {
 									plazaM[i].matricula[j] -= 32;
 								}
 							}
 
-							for (j = 0; j < 7; j++) {
-								if (a == 0 && 48 <= plazaM[i].matricula[j] && plazaM[i].matricula[j] <= 57) {
-									a++;
-								}
-								else if (a == 1 && 48 <= plazaM[i].matricula[j] && plazaM[i].matricula[j] <= 57) {
-									a++;
-								}
-								else if (a == 2 && 48 <= plazaM[i].matricula[j] && plazaM[i].matricula[j] <= 57) {
-									a++;
-								}
-								else if (a == 3 && 48 <= plazaM[i].matricula[j] && plazaM[i].matricula[j] <= 57) {
-									a++;
-								}
-								else if (a == 4 && 65 <= plazaM[i].matricula[j] && plazaM[i].matricula[j] <= 90) {
-									a++;
-								}
-								else if (a == 5 && 65 <= plazaM[i].matricula[j] && plazaM[i].matricula[j] <= 90) {
-									a++;
-								}
-								else if (a == 6 && 65 <= plazaM[i].matricula[j] && plazaM[i].matricula[j] <= 90) {
-									a++;
-								}
-								else {
-									plazaM[i].matricula[0] = 0;
-									a = 0;
-									break;
-								}
-							}
-
-							if (a == 7) {
+							if (esMatriculaValida(plazaM[i].matricula)) {
 								for (j = 0; j < PLAZASM; j++) {
 									if (i != j) {
 										if (strcmp(plazaM[i].matricula, plazaM[j].matricula) == 0) {
@@ -253,6 +197,9 @@ void main() {
 									plazaM[i].tiempo1 = time(NULL);
 									auxM++;
 								}
+								else {
+									plazaM[i].matricula[0] = 0;
+								}
 
 								a = 0;
 								k = 0;
@@ -261,6 +208,7 @@ void main() {
 							else {
 								printf("\n");
 								printf("Matricula incorrecta\n");
+								plazaM[i].matricula[0] = 0;
 								break;
 							}
 						}
@@ -526,4 +474,74 @@ void main() {
 		printf("\n");
 		system("pause");
 	}
+}
+
+char menu() {
+
+	char opcion;
+
+	printf("Que accion desea realizar?\n\n");
+	printf("Pulse 'R' para reservar plaza\n");
+	printf("Pulse 'A' para abandonar plaza\n");
+	printf("Pulse 'E' para ver el estado de aparcamiento\n");
+	printf("Pulse 'B' para buscar vehiculo por matricula\n");
+	printf("Pulse 'S' para finalizar sesion\n\n");
+	scanf_s("%c", &opcion, 1);
+	getchar();
+	system("cls");
+
+	return opcion;
+}
+
+int esDigitoValido(char caracter) {
+
+	if (48 <= caracter && caracter <= 57) {
+		return 1;
+	}
+
+	return 0;
+}
+
+int esLetraValida(char caracter) {
+
+	if (66 <= caracter && caracter <= 90 && caracter != 73 && caracter != 85 && caracter != 69 && caracter != 79) {
+		return 1;
+	}
+
+	return 0;
+}
+
+int esMatriculaValida(char matricula[]) {
+
+	int i, a = 0;
+
+	for (i = 0; i < 4; i++) {
+		if (esDigitoValido(matricula[i])) {
+			a++;
+		}
+	}
+
+	for (i = 4; i < 7; i++) {
+		if (esLetraValida(matricula[i])) {
+			a++;
+		}
+	}
+
+	if (a == 7) {
+		return 1;
+	}
+
+	return 0;
+}
+
+int existeUsuario(struct usuario usuarioValido, char username[], char password[]) {
+
+	if (strcmp(usuarioValido.nombre, username) == 0) {
+
+		if (strcmp(usuarioValido.password, password) == 0) {
+			return 1;
+		}
+	}
+
+	return 0;
 }
